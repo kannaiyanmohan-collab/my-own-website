@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Math Game App</title>
+<style>
+    body {
+        font-family: Arial;
+        text-align: center;
+        background: #f3f3f3;
+        padding: 20px;
+    }
+    #game, #questionScreen {
+        display: none;
+    }
+    .btn {
+        padding: 12px 20px;
+        background: #008CFF;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        margin: 10px;
+        font-size: 18px;
+    }
+    #result {
+        font-size: 24px;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+
+    /* animations */
+    .correct {
+        color: green;
+        animation: correctAnim 0.5s;
+    }
+    .wrong {
+        color: red;
+        animation: wrongAnim 0.5s;
+    }
+    @keyframes correctAnim {
+        0% { transform: scale(0.5); }
+        100% { transform: scale(1.2); }
+    }
+    @keyframes wrongAnim {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(20deg); }
+    }
+</style>
+</head>
+<body>
+
+<h1>Math Game App</h1>
+
+<!-- HOME SCREEN -->
+<div id="home">
+    <h2>Select Level</h2>
+    <button class="btn" onclick="startGame('easy')">Easy</button>
+    <button class="btn" onclick="startGame('medium')">Medium</button>
+    <button class="btn" onclick="startGame('hard')">Hard</button>
+</div>
+
+<!-- QUESTION SCREEN -->
+<div id="questionScreen">
+    <h2 id="timer">Time: 20</h2>
+    <h2 id="question">Question</h2>
+    
+    <input id="answerInput" type="number" placeholder="Your answer" style="font-size:20px;">
+    <br><br>
+
+    <button class="btn" onclick="checkAnswer()">Submit</button>
+    <p id="result"></p>
+</div>
+
+<!-- AUDIO -->
+<audio id="correctSound">
+    <source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
+</audio>
+<audio id="wrongSound">
+    <source src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg">
+</audio>
+
+<script>
+let num1, num2, answer, operator;
+let timeLeft = 20;
+let timer;
+let difficulty;
+
+// start game
+function startGame(level) {
+    difficulty = level;
+    document.getElementById("home").style.display = "none";
+    document.getElementById("questionScreen").style.display = "block";
+    nextQuestion();
+    startTimer();
+}
+
+// timer
+function startTimer() {
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerHTML = "Time: " + timeLeft;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("Time's up!");
+            location.reload();
+        }
+    }, 1000);
+}
+
+// generate question
+function nextQuestion() {
+    let max = difficulty === "easy" ? 10 :
+              difficulty === "medium" ? 50 : 100;
+
+    num1 = Math.floor(Math.random() * max) + 1;
+    num2 = Math.floor(Math.random() * max) + 1;
+
+    let ops = ["+","-","*","/"];
+    operator = ops[Math.floor(Math.random() * ops.length)];
+
+    if (operator === "/") {
+        num1 = num1 * num2; // make divisible equation
+    }
+
+    answer = eval(num1 + operator + num2);
+
+    document.getElementById("question").innerHTML = `${num1} ${operator} ${num2}`;
+    document.getElementById("answerInput").value = "";
+    document.getElementById("result").innerHTML = "";
+}
+
+// check answer
+function checkAnswer() {
+    let userAns = Number(document.getElementById("answerInput").value);
+
+    let resultText = document.getElementById("result");
+    let correctS = document.getElementById("correctSound");
+    let wrongS = document.getElementById("wrongSound");
+
+    if (userAns === answer) {
+        resultText.innerHTML = "Correct!";
+        resultText.className = "correct";
+        correctS.play();
+    } else {
+        resultText.innerHTML = "Wrong!";
+        resultText.className = "wrong";
+        wrongS.play();
+    }
+
+    setTimeout(() => {
+        nextQuestion();
+    }, 1000);
+}
+</script>
+
+</body>
+</html>
